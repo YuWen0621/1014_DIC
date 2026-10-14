@@ -4,7 +4,8 @@
 
 An interactive, browser-based machine learning explorer for **Multiple Linear Regression** and **Feature Selection**, following the **CRISP-DM** methodology. Compare 6 feature selection algorithms across 3 datasets, visualize bias-variance tradeoffs, and run regression on your own CSV data — all without installing anything.
 <img width="1892" height="1001" alt="image" src="https://github.com/user-attachments/assets/f70c1e3f-6e0f-4a42-b72e-f25d437d38fe" />
-<img width="1892" height="1001" alt="image" src="https://github.com/user-attachments/assets/92220157-219e-4a9f-aa6d-8f46e9e987c4" />
+<img width="1173" height="12099" alt="yuwen0621 github io_1014_DIC_" src="https://github.com/user-attachments/assets/3e315a4c-0a3e-452d-97d0-2fbba51439ae" />
+
 
 ---
 
