@@ -12,13 +12,14 @@ let rmseChartInstance = null;
 let r2ChartInstance = null;
 
 const ALGO_COLORS = {
-  'Pearson Correlation': '#4f46e5',
-  'F-test': '#EF4444', // Red color for F-test
-  'RFECV': '#059669',
-  'Exhaustive Feature Selection': '#8b5cf6',
-  'LassoCV': '#d97706',
-  'Baseline OLS': '#3b82f6'
+  'Pearson Correlation': '#336640', // Deep Forest / Sage Green
+  'F-test': '#EF4444',              // Red for F-test
+  'RFECV': '#2A9D8F',               // Fresh Mint Teal
+  'Exhaustive Feature Selection': '#7663A8', // Soft Lavender Purple
+  'LassoCV': '#D97706',             // Warm Honey Amber
+  'Baseline OLS': '#457B9D'          // Muted Slate Blue
 };
+
 
 // Distinct dash patterns — visually separate overlapping curves
 const ALGO_DASH = {
@@ -775,14 +776,14 @@ function initCharts() {
           display: true,
           text: 'Number of Features (k)',
           font: { family: 'Inter', weight: 600, size: 12 },
-          color: '#334155'
+          color: '#4a5e45'
         },
-        grid: { color: '#f1f5f9' },
-        ticks: { font: { family: 'Inter', size: 11 } }
+        grid: { color: '#eef4ea' },
+        ticks: { font: { family: 'Inter', size: 11 }, color: '#657b5f' }
       },
       y: {
-        grid: { color: '#f1f5f9' },
-        ticks: { font: { family: 'Inter', size: 11 } }
+        grid: { color: '#eef4ea' },
+        ticks: { font: { family: 'Inter', size: 11 }, color: '#657b5f' }
       }
     },
     onClick: (e, elements) => {
@@ -811,7 +812,7 @@ function initCharts() {
             display: true,
             text: 'RMSE ($) (Lower is Better)',
             font: { family: 'Inter', weight: 600, size: 12 },
-            color: '#334155'
+            color: '#4a5e45'
           },
           ticks: {
             ...commonOptions.scales.y.ticks,
@@ -836,7 +837,7 @@ function initCharts() {
             display: true,
             text: 'R-squared (Higher is Better)',
             font: { family: 'Inter', weight: 600, size: 12 },
-            color: '#334155'
+            color: '#4a5e45'
           },
           ticks: {
             ...commonOptions.scales.y.ticks,

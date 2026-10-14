@@ -48,10 +48,6 @@
           <i class="fa-solid fa-arrow-up-right-from-square"></i>
           Style Ref: StatsUnlock
         </a>
-        <a href="https://github.com/huanchen1107/AIoT-DIC2-MultipleLR" target="_blank" class="ref-btn">
-          <i class="fa-brands fa-github"></i>
-          Reference Project
-        </a>
       </div>
     </div>
   </header>
@@ -123,25 +119,25 @@
           <i class="fa-solid fa-scale-balanced"></i> Baseline OLS
           <span class="badge-pill">Full Benchmark</span>
         </button>
-        <button class="tab-btn" data-algo="ALL" style="border-left: 2px solid var(--primary); background: #f8fafc;">
-          <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> 🌟 Compare All 6 Methods
+        <button class="tab-btn" data-algo="ALL" style="border: 1.5px solid var(--cream-yellow-border); background: var(--cream-yellow); color: var(--cream-yellow-text);">
+          <i class="fa-solid fa-layer-group" style="color: var(--accent-amber);"></i> 🌟 Compare All 6 Methods
         </button>
       </div>
 
       <!-- Method Filter Panel — only visible in Compare All 6 mode -->
-      <div id="methodFilterPanel" style="display:none; margin-top: 12px; padding: 12px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-          <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">
-            <i class="fa-solid fa-filter"></i> Filter Methods to Compare
+      <div id="methodFilterPanel" style="display:none; margin-top: 14px; padding: 14px 20px; background: var(--cream-subtle); border: 1px solid var(--slate-200); border-radius: var(--radius-lg);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <span style="font-size: 12px; font-weight: 700; color: var(--slate-700); text-transform: uppercase; letter-spacing: 0.05em;">
+            <i class="fa-solid fa-filter" style="color: var(--primary);"></i> Filter Methods to Compare
           </span>
-          <div style="display: flex; gap: 6px;">
-            <button id="filterSelectAll" style="font-size: 11px; padding: 3px 10px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; color: #475569; font-family: inherit; font-weight: 600;">All</button>
-            <button id="filterClearAll" style="font-size: 11px; padding: 3px 10px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; color: #475569; font-family: inherit; font-weight: 600;">None</button>
+          <div style="display: flex; gap: 8px;">
+            <button id="filterSelectAll" style="font-size: 11px; padding: 4px 12px; border: 1px solid var(--slate-200); background: #ffffff; border-radius: var(--radius-pill); cursor: pointer; color: var(--slate-700); font-family: inherit; font-weight: 600;">All</button>
+            <button id="filterClearAll" style="font-size: 11px; padding: 4px 12px; border: 1px solid var(--slate-200); background: #ffffff; border-radius: var(--radius-pill); cursor: pointer; color: var(--slate-700); font-family: inherit; font-weight: 600;">None</button>
           </div>
         </div>
         <div id="methodFilterChips" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-        <div style="margin-top: 10px; font-size: 11px; color: #94a3b8; font-style: italic;">
-          <i class="fa-solid fa-circle-info"></i> All 6 methods have valid data for k = 1–5. Hover any point to see all visible methods at that k.
+        <div style="margin-top: 10px; font-size: 11.5px; color: var(--slate-500); font-style: italic;">
+          <i class="fa-solid fa-circle-info"></i> Toggle methods to compare progression curves on the dual charts.
         </div>
       </div>
 
@@ -225,17 +221,17 @@
     </div>
 
     <!-- Active Features Chips & Parsimony Ribbon -->
-    <div style="background: white; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-sm);">
-      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+    <div style="background: #ffffff; border: 1px solid var(--slate-200); border-radius: var(--radius-xl); padding: 16px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; box-shadow: var(--shadow-sm);">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
         <span style="font-size: 13px; font-weight: 700; color: var(--slate-700);">
           <i class="fa-solid fa-check-double" style="color: var(--primary);"></i> Active Predictors (<span id="featuresCount">2</span>):
         </span>
         <div id="featuresListChips" style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <span class="feature-chip"><i class="fa-solid fa-check" style="color: #10b981; font-size: 10px;"></i> R&D Spend</span>
-          <span class="feature-chip"><i class="fa-solid fa-check" style="color: #10b981; font-size: 10px;"></i> Marketing Spend</span>
+          <span class="feature-chip"><i class="fa-solid fa-check" style="color: var(--mint-accent); font-size: 10px;"></i> R&D Spend</span>
+          <span class="feature-chip"><i class="fa-solid fa-check" style="color: var(--mint-accent); font-size: 10px;"></i> Marketing Spend</span>
         </div>
       </div>
-      <div id="parsimonyNotice" class="badge-tag badge-green" style="font-size: 12px; padding: 5px 12px;">
+      <div id="parsimonyNotice" class="badge-tag badge-green" style="font-size: 12px; padding: 6px 14px;">
         <i class="fa-solid fa-star"></i> Occam's Razor: 2-feature model minimizes cross-validation and test RMSE.
       </div>
     </div>
