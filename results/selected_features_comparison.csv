@@ -3,5 +3,5 @@ Baseline Linear Regression,1,1,1,1,1
 Pearson Correlation,1,0,1,0,0
 F-test,1,0,1,0,0
 LassoCV,1,1,1,0,0
-RFECV,1,1,1,1,1
+RFECV,1,1,1,0,0
 Exhaustive Feature Selection,1,1,1,0,0

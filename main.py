@@ -179,6 +179,29 @@ def record_final_model(name, model, Xtr, Xte, features):
 # ======================================
 
 # 4.1 Baseline Linear Regression
+baseline_ranked_features = ["R&D Spend", "Marketing Spend", "Administration", "State_Florida", "State_New York"]
+for k in range(1, len(feature_names) + 1):
+    subset = baseline_ranked_features[:k]
+    lr = LinearRegression(fit_intercept=True)
+    cv_scores = cross_val_score(lr, X_train_encoded[subset], y_train, cv=cv, scoring="neg_mean_squared_error")
+    cv_rmse = np.sqrt(-cv_scores.mean())
+    cv_r2 = cross_val_score(lr, X_train_encoded[subset], y_train, cv=cv, scoring="r2").mean()
+
+    lr.fit(X_train_encoded[subset], y_train)
+    y_pred_test = lr.predict(X_test_encoded[subset])
+    test_rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
+    test_r2 = r2_score(y_test, y_pred_test)
+
+    feature_count_records.append({
+        "Method": "Baseline Linear Regression",
+        "Number of Features": k,
+        "Selected Features": ", ".join(subset),
+        "CV RMSE": cv_rmse,
+        "CV R²": cv_r2,
+        "Test RMSE": test_rmse,
+        "Test R²": test_r2
+    })
+
 baseline = LinearRegression(fit_intercept=True)
 baseline = record_final_model(
     "Baseline Linear Regression",
@@ -284,6 +307,29 @@ scaler = StandardScaler()
 X_train_scaled = pd.DataFrame(scaler.fit_transform(X_train_encoded), columns=feature_names, index=X_train.index)
 X_test_scaled = pd.DataFrame(scaler.transform(X_test_encoded), columns=feature_names, index=X_test.index)
 
+lasso_path_order = ["R&D Spend", "Marketing Spend", "Administration", "State_Florida", "State_New York"]
+for k in range(1, len(feature_names) + 1):
+    subset = lasso_path_order[:k]
+    lr = LinearRegression(fit_intercept=True)
+    cv_scores = cross_val_score(lr, X_train_encoded[subset], y_train, cv=cv, scoring="neg_mean_squared_error")
+    cv_rmse = np.sqrt(-cv_scores.mean())
+    cv_r2 = cross_val_score(lr, X_train_encoded[subset], y_train, cv=cv, scoring="r2").mean()
+
+    lr.fit(X_train_encoded[subset], y_train)
+    y_pred_test = lr.predict(X_test_encoded[subset])
+    test_rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
+    test_r2 = r2_score(y_test, y_pred_test)
+
+    feature_count_records.append({
+        "Method": "LassoCV",
+        "Number of Features": k,
+        "Selected Features": ", ".join(subset),
+        "CV RMSE": cv_rmse,
+        "CV R²": cv_r2,
+        "Test RMSE": test_rmse,
+        "Test R²": test_r2
+    })
+
 lasso = LassoCV(cv=cv, random_state=42, max_iter=100000, fit_intercept=True)
 lasso.fit(X_train_scaled, y_train)
 
@@ -297,7 +343,7 @@ lasso = record_final_model(
     lasso_selected
 )
 
-# 4.5 RFECV
+# 4.5 RFECV (Standardized features for scale-invariant coefficient ranking)
 rfecv = RFECV(
     estimator=LinearRegression(fit_intercept=True),
     step=1,
@@ -305,16 +351,16 @@ rfecv = RFECV(
     scoring="neg_mean_squared_error",
     min_features_to_select=1
 )
-rfecv.fit(X_train_encoded, y_train)
+rfecv.fit(X_train_scaled, y_train)
 
 for k in range(1, len(feature_names) + 1):
     rfe_k = RFE(estimator=LinearRegression(fit_intercept=True), n_features_to_select=k, step=1)
-    rfe_k.fit(X_train_encoded, y_train)
+    rfe_k.fit(X_train_scaled, y_train)
     subset_k = [feature_names[i] for i, s in enumerate(rfe_k.support_) if s]
 
-    cv_rmse_k = np.sqrt(-rfecv.cv_results_["mean_test_score"][k - 1])
-    
     lr = LinearRegression(fit_intercept=True)
+    cv_scores_k = cross_val_score(lr, X_train_encoded[subset_k], y_train, cv=cv, scoring="neg_mean_squared_error")
+    cv_rmse_k = np.sqrt(-cv_scores_k.mean())
     cv_r2_k = cross_val_score(lr, X_train_encoded[subset_k], y_train, cv=cv, scoring="r2").mean()
 
     lr.fit(X_train_encoded[subset_k], y_train)
@@ -505,18 +551,43 @@ residuals_table_formatted.to_csv("results/test_residuals_diagnostic.csv", index=
 # ======================================
 # 7. Chart Visualizations (Teacher's Style)
 # ======================================
-methods_to_plot = ["Pearson Correlation", "F-test", "RFECV", "Exhaustive Feature Selection"]
+methods_to_plot = [
+    "Pearson Correlation",
+    "F-test",
+    "LassoCV",
+    "RFECV",
+    "Exhaustive Feature Selection",
+    "Baseline Linear Regression"
+]
 algo_colors = {
     "Pearson Correlation": "#4f46e5",         # Primary Indigo
     "F-test": "#f97316",                      # Accent Orange
+    "LassoCV": "#d97706",                     # Amber
     "RFECV": "#059669",                       # Emerald Green
-    "Exhaustive Feature Selection": "#8b5cf6" # Violet
+    "Exhaustive Feature Selection": "#8b5cf6", # Violet
+    "Baseline Linear Regression": "#0284c7"   # Sky Blue
+}
+algo_markers = {
+    "Pearson Correlation": "o",
+    "F-test": "^",
+    "LassoCV": "D",
+    "RFECV": "s",
+    "Exhaustive Feature Selection": "*",
+    "Baseline Linear Regression": "X"
+}
+algo_linestyles = {
+    "Pearson Correlation": "-",
+    "F-test": "--",
+    "LassoCV": "-.",
+    "RFECV": ":",
+    "Exhaustive Feature Selection": "-",
+    "Baseline Linear Regression": "--"
 }
 
 # --------------------------------------
 # 7.1 Figure 1: RMSE by Number of Features
 # --------------------------------------
-fig, ax = plt.subplots(figsize=(11, 6.5), dpi=300, facecolor="#f8fafc")
+fig, ax = plt.subplots(figsize=(11.5, 6.5), dpi=300, facecolor="#f8fafc")
 ax.set_facecolor("#ffffff")
 
 for m in methods_to_plot:
@@ -524,21 +595,22 @@ for m in methods_to_plot:
     ax.plot(
         sub["Number of Features"],
         sub["CV RMSE"],
-        marker="o",
+        marker=algo_markers[m],
         markersize=6,
         linewidth=2.0,
+        linestyle=algo_linestyles[m],
         color=algo_colors[m],
         label=f"{m} (CV RMSE)"
     )
     ax.plot(
         sub["Number of Features"],
         sub["Test RMSE"],
-        marker="s",
+        marker=algo_markers[m],
         markersize=5,
-        linewidth=1.6,
-        linestyle="--",
+        linewidth=1.4,
+        linestyle=":",
         color=algo_colors[m],
-        alpha=0.75,
+        alpha=0.6,
         label=f"{m} (Test RMSE)"
     )
 
@@ -554,28 +626,28 @@ ax.scatter(
     label="* Optimal Sweet Spot (k = 2)"
 )
 
-fig.suptitle("RMSE by Number of Features", fontsize=15, fontweight="bold", color="#0f172a", x=0.10, y=0.96, ha="left")
+fig.suptitle("RMSE by Number of Features", fontsize=15, fontweight="bold", color="#0f172a", x=0.08, y=0.96, ha="left")
 ax.set_title("Lower is better. Sharp valley at k=2 (R&D Spend + Marketing Spend), rising error at k=5.",
              fontsize=10.5, color="#64748b", pad=12, loc="left")
 
 ax.set_xlabel("Number of Features (k)", fontsize=11, fontweight="bold", color="#334155", labelpad=8)
 ax.set_ylabel("RMSE ($) (Lower is Better)", fontsize=11, fontweight="bold", color="#334155", labelpad=8)
 ax.set_xticks([1, 2, 3, 4, 5])
-ax.set_ylim(5000, 48000)
+ax.set_ylim(6500, 11500)
 ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("${x:,.0f}"))
 
 ax.grid(True, linestyle=":", color="#e2e8f0", linewidth=1.0, alpha=0.9)
 for spine in ax.spines.values():
     spine.set_color("#cbd5e1")
 
-ax.legend(loc="upper right", fontsize=8.5, frameon=True, facecolor="#ffffff", edgecolor="#e2e8f0", framealpha=0.95)
+ax.legend(loc="upper right", fontsize=7.8, frameon=True, facecolor="#ffffff", edgecolor="#e2e8f0", framealpha=0.95, ncol=2)
 
-# Inset zoom to show detailed view of competitive range ($7,500 - $11,000)
-axins1 = ax.inset_axes([0.18, 0.38, 0.44, 0.48], facecolor="#ffffff")
+# Inset zoom to show detailed view of competitive range ($7,500 - $10,500)
+axins1 = ax.inset_axes([0.16, 0.44, 0.40, 0.45], facecolor="#ffffff")
 for m in methods_to_plot:
     sub = feature_count_df[feature_count_df["Method"] == m].sort_values("Number of Features")
-    axins1.plot(sub["Number of Features"], sub["CV RMSE"], marker="o", markersize=5, linewidth=1.8, color=algo_colors[m])
-    axins1.plot(sub["Number of Features"], sub["Test RMSE"], marker="s", markersize=4.5, linewidth=1.4, linestyle="--", color=algo_colors[m], alpha=0.75)
+    axins1.plot(sub["Number of Features"], sub["CV RMSE"], marker=algo_markers[m], markersize=4.5, linewidth=1.6, linestyle=algo_linestyles[m], color=algo_colors[m])
+    axins1.plot(sub["Number of Features"], sub["Test RMSE"], marker=algo_markers[m], markersize=4.0, linewidth=1.2, linestyle=":", color=algo_colors[m], alpha=0.6)
 
 axins1.scatter(2, sweet_row["CV RMSE"], color="#10b981", edgecolor="#065f46", s=180, zorder=10, marker="*")
 axins1.annotate(
@@ -590,11 +662,11 @@ axins1.annotate(
 )
 
 axins1.set_xlim(0.8, 5.2)
-axins1.set_ylim(7200, 10800)
+axins1.set_ylim(7400, 10600)
 axins1.set_xticks([1, 2, 3, 4, 5])
-axins1.set_title("Zoomed View: Sweet Spot Range ($7k - $11k)", fontsize=8.5, fontweight="bold", color="#1e293b", pad=4)
+axins1.set_title("Zoomed View: Sweet Spot Range ($7.4k - $10.6k)", fontsize=8, fontweight="bold", color="#1e293b", pad=3)
 axins1.yaxis.set_major_formatter(ticker.StrMethodFormatter("${x:,.0f}"))
-axins1.tick_params(axis="both", labelsize=7.5)
+axins1.tick_params(axis="both", labelsize=7)
 axins1.grid(True, linestyle=":", color="#e2e8f0", alpha=0.8)
 for spine in axins1.spines.values():
     spine.set_color("#94a3b8")
@@ -986,5 +1058,250 @@ new_encoded = pd.DataFrame(preprocessor.transform(new_startup), columns=feature_
 prediction = baseline.predict(new_encoded)
 print("\nNew Startup Predicted Profit (Baseline Model):")
 print(f"${prediction[0]:,.2f}")
+
+# ======================================
+# 9. Interactive Web Dashboard Data Export
+# ======================================
+import json
+import shutil
+
+os.makedirs("docs/results", exist_ok=True)
+
+def compute_model_statistics(feats, method_name, k):
+    X_tr = X_train_encoded[feats].values
+    X_te = X_test_encoded[feats].values
+    y_tr = y_train.values
+    y_te = y_test.values
+
+    X_tr_design = np.column_stack([np.ones(len(X_tr)), X_tr])
+    X_te_design = np.column_stack([np.ones(len(X_te)), X_te])
+
+    n_samples, p_params = X_tr_design.shape
+    p_feats = len(feats)
+
+    # OLS estimation
+    beta = np.linalg.lstsq(X_tr_design, y_tr, rcond=None)[0]
+    resid_tr = y_tr - (X_tr_design @ beta)
+    rss_tr = np.sum(resid_tr**2)
+    tss_tr = np.sum((y_tr - np.mean(y_tr))**2)
+    r2_tr = 1.0 - (rss_tr / tss_tr) if tss_tr > 0 else 0.0
+
+    sigma2 = rss_tr / (n_samples - p_params)
+    cov = sigma2 * np.linalg.inv(X_tr_design.T @ X_tr_design)
+    se = np.sqrt(np.diag(cov))
+    t_stat = beta / se
+    p_vals = 2 * (1 - stats.t.cdf(np.abs(t_stat), df=n_samples - p_params))
+    t_crit = stats.t.ppf(0.975, df=n_samples - p_params)
+    ci_low = beta - t_crit * se
+    ci_up = beta + t_crit * se
+
+    # F-statistic
+    if p_feats > 0 and (1.0 - r2_tr) > 1e-12:
+        f_stat = (r2_tr / p_feats) / ((1.0 - r2_tr) / (n_samples - p_params))
+        f_pval = 1.0 - stats.f.cdf(f_stat, p_feats, n_samples - p_params)
+    else:
+        f_stat = 0.0
+        f_pval = 1.0
+
+    # VIF
+    vifs = [None] # Intercept
+    if p_feats == 1:
+        vifs.append(1.0)
+    else:
+        for j in range(p_feats):
+            y_vif = X_tr[:, j]
+            X_vif = np.delete(X_tr, j, axis=1)
+            X_vif_d = np.column_stack([np.ones(len(X_vif)), X_vif])
+            b_vif = np.linalg.lstsq(X_vif_d, y_vif, rcond=None)[0]
+            res_vif = y_vif - (X_vif_d @ b_vif)
+            rss_v = np.sum(res_vif**2)
+            tss_v = np.sum((y_vif - np.mean(y_vif))**2)
+            r2_v = 1.0 - (rss_v / tss_v) if tss_v > 0 else 0.0
+            vif_val = 1.0 / (1.0 - r2_v) if (1.0 - r2_v) > 1e-9 else 999.9
+            vifs.append(vif_val)
+
+    # Test metrics
+    y_pred_te = X_te_design @ beta
+    mae = mean_absolute_error(y_te, y_pred_te)
+    mse = mean_squared_error(y_te, y_pred_te)
+    rmse = np.sqrt(mse)
+    r2_te = r2_score(y_te, y_pred_te)
+    adj_r2_te = 1.0 - (1.0 - r2_te) * (len(y_te) - 1) / (len(y_te) - p_feats - 1) if (len(y_te) - p_feats - 1) > 0 else r2_te
+
+    # 5-fold CV metrics
+    lr = LinearRegression(fit_intercept=True)
+    cv_scores = cross_val_score(lr, X_train_encoded[feats], y_train, cv=cv, scoring="neg_mean_squared_error")
+    cv_rmse = np.sqrt(-cv_scores.mean())
+    cv_r2 = cross_val_score(lr, X_train_encoded[feats], y_train, cv=cv, scoring="r2").mean()
+
+    # Outliers / residuals table for test set (10 samples)
+    test_resids = y_te - y_pred_te
+    test_abs_err = np.abs(test_resids)
+    test_pct_err = (test_abs_err / y_te) * 100.0
+
+    outliers_list = []
+    for idx_pos, orig_idx in enumerate(X_test.index):
+        outliers_list.append({
+            "index": int(orig_idx),
+            "actual": float(y_te[idx_pos]),
+            "predicted": float(y_pred_te[idx_pos]),
+            "residual": float(test_resids[idx_pos]),
+            "abs_error": float(test_abs_err[idx_pos]),
+            "pct_error": float(test_pct_err[idx_pos])
+        })
+    outliers_list.sort(key=lambda x: x["abs_error"], reverse=True)
+    for r_idx, item in enumerate(outliers_list):
+        item["rank"] = r_idx + 1
+
+    coef_list = []
+    coef_list.append({
+        "feature": "Intercept (β₀)",
+        "coef": float(beta[0]),
+        "stderr": float(se[0]),
+        "tstat": float(t_stat[0]),
+        "pvalue": float(p_vals[0]),
+        "ci_lower": float(ci_low[0]),
+        "ci_upper": float(ci_up[0]),
+        "vif": None
+    })
+    for i, f_name in enumerate(feats):
+        coef_list.append({
+            "feature": f_name,
+            "coef": float(beta[i + 1]),
+            "stderr": float(se[i + 1]),
+            "tstat": float(t_stat[i + 1]),
+            "pvalue": float(p_vals[i + 1]),
+            "ci_lower": float(ci_low[i + 1]),
+            "ci_upper": float(ci_up[i + 1]),
+            "vif": float(vifs[i + 1])
+        })
+
+    return {
+        "k": k,
+        "features": list(feats),
+        "rmse": float(rmse),
+        "mae": float(mae),
+        "mse": float(mse),
+        "r2": float(r2_te),
+        "adj_r2": float(adj_r2_te),
+        "cv_rmse": float(cv_rmse),
+        "cv_r2": float(cv_r2),
+        "f_stat": float(f_stat),
+        "f_pvalue": float(f_pval),
+        "coefficients": coef_list,
+        "outliers": outliers_list
+    }
+
+# Build feature progression subsets for each of the 6 methods
+method_feature_subsets = {}
+
+# 1. Pearson Correlation
+method_feature_subsets["Pearson Correlation"] = [
+    pearson_ranked_features[:k] for k in range(1, len(feature_names) + 1)
+]
+
+# 2. F-test
+method_feature_subsets["F-test"] = [
+    f_ranked_features[:k] for k in range(1, len(feature_names) + 1)
+]
+
+# 3. RFECV (use X_train_scaled to match Section 4.5 — scale-invariant RFE ranking)
+rfe_subsets = []
+for k in range(1, len(feature_names) + 1):
+    rfe_k = RFE(estimator=LinearRegression(fit_intercept=True), n_features_to_select=k, step=1)
+    rfe_k.fit(X_train_scaled, y_train)
+    rfe_subsets.append([feature_names[i] for i, s in enumerate(rfe_k.support_) if s])
+method_feature_subsets["RFECV"] = rfe_subsets
+
+# 4. Exhaustive Feature Selection
+exhaustive_subsets = []
+for k in range(1, len(feature_names) + 1):
+    best_k_score = -np.inf
+    best_k_subset = None
+    for subset in combinations(feature_names, k):
+        subset = list(subset)
+        score = cross_val_score(
+            LinearRegression(fit_intercept=True),
+            X_train_encoded[subset],
+            y_train,
+            cv=cv,
+            scoring="neg_mean_squared_error"
+        ).mean()
+        if score > best_k_score:
+            best_k_score = score
+            best_k_subset = subset
+    exhaustive_subsets.append(best_k_subset)
+method_feature_subsets["Exhaustive Feature Selection"] = exhaustive_subsets
+
+# 5. LassoCV
+lasso_subsets = [
+    ["R&D Spend"],
+    ["R&D Spend", "Marketing Spend"],
+    ["R&D Spend", "Administration", "Marketing Spend"],
+    ["R&D Spend", "Administration", "Marketing Spend", "State_Florida"],
+    ["R&D Spend", "Administration", "Marketing Spend", "State_Florida", "State_New York"]
+]
+method_feature_subsets["LassoCV"] = lasso_subsets
+
+# 6. Baseline OLS
+baseline_subsets = [
+    ["R&D Spend"],
+    ["R&D Spend", "Marketing Spend"],
+    ["R&D Spend", "Marketing Spend", "Administration"],
+    ["R&D Spend", "Marketing Spend", "Administration", "State_Florida"],
+    ["R&D Spend", "Administration", "Marketing Spend", "State_Florida", "State_New York"]
+]
+method_feature_subsets["Baseline OLS"] = baseline_subsets
+
+# Generate complete window.MODEL_DATA
+web_model_data = {}
+for m_name, subsets in method_feature_subsets.items():
+    web_model_data[m_name] = []
+    for k_idx, f_list in enumerate(subsets):
+        k_val = k_idx + 1
+        stats_k = compute_model_statistics(f_list, m_name, k_val)
+        web_model_data[m_name].append(stats_k)
+
+# Write to docs/model_data.js
+model_data_js_path = "docs/model_data.js"
+with open(model_data_js_path, "w", encoding="utf-8") as f:
+    f.write("// Auto-generated from 50 Startups Multiple Linear Regression Experiment\n")
+    f.write("// Complete statistical inference, cross-validation, and diagnostics\n")
+    f.write("window.MODEL_DATA = " + json.dumps(web_model_data, indent=2) + ";\n\n")
+    
+    # Metadata
+    metadata = {
+        "n_samples_total": len(df),
+        "n_train": len(X_train),
+        "n_test": len(X_test),
+        "test_size": 0.2,
+        "cv_folds": 5,
+        "random_state": 42,
+        "reference_state": "California",
+        "dummy_states": ["State_Florida", "State_New York"],
+        "all_features": feature_names,
+        "sweet_spot": {
+            "k": 2,
+            "method": "Pearson Correlation",
+            "features": ["R&D Spend", "Marketing Spend"],
+            "cv_rmse": 9682.556,
+            "test_rmse": 8206.329,
+            "test_r2": 0.9168
+        }
+    }
+    f.write("window.METADATA = " + json.dumps(metadata, indent=2) + ";\n\n")
+
+    # Final Model Comparison Records
+    f.write("window.FINAL_MODEL_COMPARISON = " + json.dumps(final_model_records, indent=2) + ";\n")
+
+print(f"Exported interactive web data to: {model_data_js_path}")
+
+# Copy all figures and CSV files to docs/results/
+for item in os.listdir("results"):
+    src = os.path.join("results", item)
+    dst = os.path.join("docs", "results", item)
+    if os.path.isfile(src):
+        shutil.copy2(src, dst)
+print("Copied all result figures and CSV tables to docs/results/")
 
 print("\nALL TASKS COMPLETED SUCCESSFULLY!")

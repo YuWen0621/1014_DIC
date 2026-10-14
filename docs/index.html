@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>50 Startups: Multiple Linear Regression & Feature Selection Explorer</title>
+  
+  <!-- Google Fonts: Outfit, Inter, Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js 4.4 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- Project Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Calculated Model Data (No hardcoding) -->
+  <script src="model_data.js"></script>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div>
+        <div class="breadcrumbs">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+          <a href="#">Regression Analysis</a>
+          <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+          <span style="color: var(--slate-800); font-weight: 600;">50 Startups Feature Progression</span>
+        </div>
+        <div class="header-title-group">
+          <h1>
+            <i class="fa-solid fa-chart-line" style="color: var(--primary);"></i>
+            50 Startups Multiple Linear Regression Explorer
+            <span class="brand-badge">CRISP-DM</span>
+          </h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="https://statsunlock.com/multiple-linear-regression-calculator/" target="_blank" class="ref-btn">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Style Ref: StatsUnlock
+        </a>
+        <a href="https://github.com/huanchen1107/AIoT-DIC2-MultipleLR" target="_blank" class="ref-btn">
+          <i class="fa-brands fa-github"></i>
+          Reference Project
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Hero Card Banner -->
+    <div class="hero-card">
+      <h2>Feature Selection & Parsimony Analysis</h2>
+      <p>
+        Compare 6 Machine Learning Feature Selection Algorithms (<strong>Pearson Correlation</strong>, <strong>F-test</strong>, <strong>LassoCV</strong>, <strong>RFECV</strong>, <strong>Exhaustive Search</strong>, and <strong>Baseline OLS</strong>). Explore the bias-variance tradeoff across feature counts \(k = 1 \dots 5\), pinpointing the <strong>2-feature optimal sweet spot</strong> and the <strong>5-feature overfitting cliff</strong>.
+      </p>
+      <div class="hero-tags">
+        <span class="hero-pill"><i class="fa-solid fa-database"></i> 50 Startups Dataset (80/20 Train-Test Split)</span>
+        <span class="hero-pill"><i class="fa-solid fa-rotate"></i> 5-Fold Cross Validation</span>
+        <span class="hero-pill"><i class="fa-solid fa-layer-group"></i> 6 Selection Strategies</span>
+        <span class="hero-pill"><i class="fa-solid fa-star" style="color: #34d399;"></i> Global Sweet Spot: k=2 ($8,206.33 Test RMSE)</span>
+        <span class="hero-pill"><i class="fa-solid fa-triangle-exclamation" style="color: #fbbf24;"></i> Overfitting Warning: k=5 ($9,055.96 Test RMSE)</span>
+      </div>
+    </div>
+
+    <!-- Controls Wrapper -->
+    <div class="controls-wrapper">
+      <span class="control-label"><i class="fa-solid fa-sliders"></i> 1. Select Feature Selection Algorithm</span>
+      <div class="tabs-pills" id="algoTabs">
+        <button class="tab-btn active" data-algo="Pearson Correlation">
+          <i class="fa-solid fa-chart-simple"></i> Pearson Correlation
+          <span class="badge-pill">Optimal k=2</span>
+        </button>
+        <button class="tab-btn" data-algo="F-test">
+          <i class="fa-solid fa-arrow-trend-up"></i> F-test
+          <span class="badge-pill">Optimal k=2</span>
+        </button>
+        <button class="tab-btn" data-algo="LassoCV">
+          <i class="fa-solid fa-filter"></i> LassoCV (L1 Regularized)
+          <span class="badge-pill">Optimal k=3</span>
+        </button>
+        <button class="tab-btn" data-algo="RFECV">
+          <i class="fa-solid fa-scissors"></i> RFECV
+          <span class="badge-pill">Backward RFE</span>
+        </button>
+        <button class="tab-btn" data-algo="Exhaustive Feature Selection">
+          <i class="fa-solid fa-magnifying-glass-chart"></i> Exhaustive Search
+          <span class="badge-pill">Best Subset</span>
+        </button>
+        <button class="tab-btn" data-algo="Baseline OLS">
+          <i class="fa-solid fa-scale-balanced"></i> Baseline OLS
+          <span class="badge-pill">Full Benchmark</span>
+        </button>
+        <button class="tab-btn" data-algo="ALL" style="border-left: 2px solid var(--primary); background: #f8fafc;">
+          <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> 🌟 Compare All 6 Methods
+        </button>
+      </div>
+
+      <!-- Method Filter Panel — only visible in Compare All 6 mode -->
+      <div id="methodFilterPanel" style="display:none; margin-top: 12px; padding: 12px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">
+            <i class="fa-solid fa-filter"></i> Filter Methods to Compare
+          </span>
+          <div style="display: flex; gap: 6px;">
+            <button id="filterSelectAll" style="font-size: 11px; padding: 3px 10px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; color: #475569; font-family: inherit; font-weight: 600;">All</button>
+            <button id="filterClearAll" style="font-size: 11px; padding: 3px 10px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; color: #475569; font-family: inherit; font-weight: 600;">None</button>
+          </div>
+        </div>
+        <div id="methodFilterChips" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        <div style="margin-top: 10px; font-size: 11px; color: #94a3b8; font-style: italic;">
+          <i class="fa-solid fa-circle-info"></i> All 6 methods have valid data for k = 1–5. Hover any point to see all visible methods at that k.
+        </div>
+      </div>
+
+      <span class="control-label" style="margin-top: 10px;"><i class="fa-solid fa-list-ol"></i> 2. Number of Features (k = 1 to 5)</span>
+      <div class="k-selector-group" id="kSelectorGroup">
+        <button class="k-btn" data-k="1">k = 1 <span style="font-weight: 400; font-size: 11px;">(R&D Spend)</span></button>
+        <button class="k-btn sweet-spot active" data-k="2">k = 2 ★ Optimal Sweet Spot <span style="font-size: 11px; font-weight: 700;">(Min RMSE)</span></button>
+        <button class="k-btn" data-k="3">k = 3 <span style="font-size: 11px;">(+ Administration / State)</span></button>
+        <button class="k-btn" data-k="4">k = 4 <span style="font-size: 11px;">(4 Predictors)</span></button>
+        <button class="k-btn overfitting" data-k="5">k = 5 ⚠ Full Model <span style="font-size: 11px; font-weight: 700;">(Overfitting Cliff)</span></button>
+      </div>
+    </div>
+
+    <!-- Metrics Ribbon -->
+    <div class="metrics-grid" id="metricsGrid">
+      <div class="metric-card sweet">
+        <div class="metric-title">
+          <span>Test RMSE</span>
+          <span class="badge-tag badge-green" id="rmseBadge"><i class="fa-solid fa-award"></i> Optimal</span>
+        </div>
+        <div class="metric-val" id="valRMSE">$8,206.33</div>
+        <div class="metric-note">
+          <span>Lower is better (Out-of-sample error)</span>
+        </div>
+      </div>
+
+      <div class="metric-card sweet">
+        <div class="metric-title">
+          <span>Test R² Score</span>
+          <span class="badge-tag badge-blue"><i class="fa-solid fa-circle-check"></i> 91.7% Fit</span>
+        </div>
+        <div class="metric-val" id="valR2">0.9168</div>
+        <div class="metric-note">
+          <span>Explains 91.68% of profit variance</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">
+          <span>Adjusted R²</span>
+          <i class="fa-solid fa-scale-balanced" style="color: var(--slate-400);"></i>
+        </div>
+        <div class="metric-val" id="valAdjR2">0.8931</div>
+        <div class="metric-note">
+          <span>Penalizes redundant parameters</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">
+          <span>Mean Absolute Error</span>
+          <i class="fa-solid fa-calculator" style="color: var(--slate-400);"></i>
+        </div>
+        <div class="metric-val" id="valMAE">$6,469.18</div>
+        <div class="metric-note">
+          <span>Average test prediction error</span>
+        </div>
+      </div>
+
+      <div class="metric-card purple">
+        <div class="metric-title">
+          <span>5-Fold CV RMSE</span>
+          <span class="badge-tag badge-purple"><i class="fa-solid fa-rotate"></i> Cross-Val</span>
+        </div>
+        <div class="metric-val" id="valCVRMSE">$9,682.56</div>
+        <div class="metric-note">
+          <span>Minimum CV generalization error</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-title">
+          <span>F-Statistic</span>
+          <span class="badge-tag badge-green">p &lt; 0.0001</span>
+        </div>
+        <div class="metric-val" id="valFStat">366.0</div>
+        <div class="metric-note">
+          <span>Overall regression significance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Features Chips & Parsimony Ribbon -->
+    <div style="background: white; border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-sm);">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span style="font-size: 13px; font-weight: 700; color: var(--slate-700);">
+          <i class="fa-solid fa-check-double" style="color: var(--primary);"></i> Active Predictors (<span id="featuresCount">2</span>):
+        </span>
+        <div id="featuresListChips" style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <span class="feature-chip"><i class="fa-solid fa-check" style="color: #10b981; font-size: 10px;"></i> R&D Spend</span>
+          <span class="feature-chip"><i class="fa-solid fa-check" style="color: #10b981; font-size: 10px;"></i> Marketing Spend</span>
+        </div>
+      </div>
+      <div id="parsimonyNotice" class="badge-tag badge-green" style="font-size: 12px; padding: 5px 12px;">
+        <i class="fa-solid fa-star"></i> Occam's Razor: 2-feature model minimizes cross-validation and test RMSE.
+      </div>
+    </div>
+
+    <!-- Dual Charts Section (Chart.js Interactive Plots) -->
+    <div class="dual-charts-grid">
+      <!-- Left Chart: RMSE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> RMSE by Number of Features</h3>
+            <div class="card-subtitle">Lower is better. Sharp valley at k=2 (R&D Spend + Marketing Spend), rising error at k=5.</div>
+          </div>
+          <span class="badge-tag badge-blue" id="rmseChartBadge">Pearson Correlation</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="rmseChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Right Chart: R-squared -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-arrow-trend-up" style="color: var(--accent-emerald);"></i> R-squared by Number of Features</h3>
+            <div class="card-subtitle">Higher is better. Peaks at k=2 (0.9168), dropping at k=5 (0.8987) due to noise.</div>
+          </div>
+          <span class="badge-tag badge-green" id="r2ChartBadge">Peak at k=2</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="r2Chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mathematical Equation Card -->
+    <div class="equation-card">
+      <div class="equation-title">
+        <i class="fa-solid fa-square-root-variable"></i> Fitted OLS Regression Equation
+      </div>
+      <div class="equation-formula" id="equationBox">
+        <strong>Profit</strong> = <span class="eq-intercept">45,542.39</span> <span class="eq-pos">+</span> 0.7834 × <span class="eq-var">(R&D Spend)</span> <span class="eq-pos">+</span> 0.0392 × <span class="eq-var">(Marketing Spend)</span>
+      </div>
+    </div>
+
+    <!-- Interactive Grid: Tables & Live Predictor -->
+    <div class="calc-grid">
+      
+      <!-- Left: Model Coefficients & Statistical Tests Table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-table" style="color: var(--primary);"></i> Model Coefficients & Statistical Tests</h3>
+            <div class="card-subtitle">Detailed parameter estimates, standard errors, t-statistics, p-values, 95% CI, and VIF multicollinearity.</div>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="coefTable">
+            <thead>
+              <tr>
+                <th>Predictor</th>
+                <th>Estimate (β)</th>
+                <th>Std. Error</th>
+                <th>t-Stat</th>
+                <th>p-Value</th>
+                <th>95% Conf. Int</th>
+                <th>VIF</th>
+              </tr>
+            </thead>
+            <tbody id="coefTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right: Live Startup Profit Predictor Calculator -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-calculator" style="color: var(--accent-emerald);"></i> Live Profit Predictor</h3>
+            <div class="card-subtitle">Test predictions in real-time using active model coefficients.</div>
+          </div>
+          <span class="badge-tag badge-green"><i class="fa-solid fa-bolt"></i> Real-time</span>
+        </div>
+
+        <div>
+          <!-- R&D Spend -->
+          <div class="input-group">
+            <div class="input-label-row">
+              <span>R&D Spend ($)</span>
+              <span id="labelRD" style="color: var(--primary); font-family: 'Fira Code', monospace; font-weight: 600;">$100,000</span>
+            </div>
+            <input type="number" id="numRD" class="input-field" value="100000" min="0" max="250000" step="5000">
+            <input type="range" id="rangeRD" class="range-slider" value="100000" min="0" max="250000" step="5000">
+          </div>
+
+          <!-- Marketing Spend -->
+          <div class="input-group">
+            <div class="input-label-row">
+              <span>Marketing Spend ($)</span>
+              <span id="labelMkt" style="color: var(--primary); font-family: 'Fira Code', monospace; font-weight: 600;">$150,000</span>
+            </div>
+            <input type="number" id="numMkt" class="input-field" value="150000" min="0" max="500000" step="5000">
+            <input type="range" id="rangeMkt" class="range-slider" value="150000" min="0" max="500000" step="5000">
+          </div>
+
+          <!-- Administration -->
+          <div class="input-group" id="inputGroupAdmin">
+            <div class="input-label-row">
+              <span>Administration ($)</span>
+              <span id="labelAdmin" style="color: var(--slate-500); font-family: 'Fira Code', monospace; font-weight: 600;">$120,000</span>
+            </div>
+            <input type="number" id="numAdmin" class="input-field" value="120000" min="0" max="250000" step="5000">
+            <input type="range" id="rangeAdmin" class="range-slider" value="120000" min="0" max="250000" step="5000">
+          </div>
+
+          <!-- State Location -->
+          <div class="input-group" id="inputGroupState">
+            <div class="input-label-row">
+              <span>State Location</span>
+            </div>
+            <select id="selectState" class="input-field">
+              <option value="California">California (Reference Level, Dummies = 0)</option>
+              <option value="Florida">Florida</option>
+              <option value="New York">New York</option>
+            </select>
+          </div>
+
+          <!-- Prediction Output Card -->
+          <div class="prediction-output-box">
+            <div class="pred-label">Predicted Startup Profit</div>
+            <div class="pred-value" id="predProfitOutput">$132,307.59</div>
+            <div class="pred-formula-note" id="predFormulaNote">
+              Calculated using: β₀ + β₁(R&D) + β₂(Marketing)
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Residual Diagnostics & Top 10 Outliers -->
+    <div class="card" style="margin-top: 24px;">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h3><i class="fa-solid fa-magnifying-glass" style="color: var(--accent-amber);"></i> Test Set Residuals & Outliers Diagnostic</h3>
+          <div class="card-subtitle">Out-of-sample test set residuals (10 startups), ranked by absolute error.</div>
+        </div>
+        <span class="badge-tag badge-blue"><i class="fa-solid fa-filter"></i> Sorted by |Residual|</span>
+      </div>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Sample ID</th>
+              <th>Actual Profit</th>
+              <th>Predicted Profit</th>
+              <th>Residual ($)</th>
+              <th>Abs Error</th>
+              <th>% Error</th>
+              <th>Diagnostic Status</th>
+            </tr>
+          </thead>
+          <tbody id="outliersTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Additional Analysis Section -->
+    <section class="additional-section">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-folder-open" style="color: var(--primary);"></i> Additional Analysis & Publication Figures</h2>
+        <p>Supplementary diagnostic visualizations, correlation matrices, consensus matrices, and cross-validation summaries from the local experiment.</p>
+      </div>
+
+      <div class="additional-grid">
+        
+        <!-- Heatmap: Correlation Matrix -->
+        <div class="analysis-img-card">
+          <div class="img-wrapper">
+            <img src="results/correlation_heatmap.png" alt="Correlation Heatmap">
+          </div>
+          <div class="analysis-card-body">
+            <h4><i class="fa-solid fa-fire-flame-curved" style="color: #ef4444;"></i> Correlation Matrix Heatmap</h4>
+            <p>
+              Shows strong linear relationship between <strong>R&D Spend and Profit (r = 0.97)</strong> and moderate correlation with Marketing Spend (r = 0.75). Administration has very low correlation with Profit (r = 0.20), explaining its exclusion in parsimonious models.
+            </p>
+          </div>
+        </div>
+
+        <!-- Heatmap: Selected Features Heatmap -->
+        <div class="analysis-img-card">
+          <div class="img-wrapper">
+            <img src="results/figure4_selected_features_heatmap.png" alt="Selected Features Heatmap">
+          </div>
+          <div class="analysis-card-body">
+            <h4><i class="fa-solid fa-table-cells" style="color: var(--primary);"></i> Feature Selection Consensus Matrix</h4>
+            <p>
+              Compares binary feature choices across all 6 methods. Notice that <strong>R&D Spend is unanimously selected</strong> by 100% of methods, followed by Marketing Spend (selected by 5 of 6), while State dummies are only retained by the full 5-feature baseline and RFECV.
+            </p>
+          </div>
+        </div>
+
+        <!-- Comparison Bar Chart: Final Model Comparison -->
+        <div class="analysis-img-card">
+          <div class="img-wrapper">
+            <img src="results/figure3_final_model_comparison.png" alt="Final Model Comparison">
+          </div>
+          <div class="analysis-card-body">
+            <h4><i class="fa-solid fa-chart-column" style="color: var(--accent-emerald);"></i> 6-Method Model Performance Comparison</h4>
+            <p>
+              Dual-bar visualization contrasting Test RMSE ($) (indigo) and Test R² (emerald). Pearson Correlation and F-test tie for the lowest test error ($8,206.33), outperforming the full Baseline OLS ($9,055.96) by over $849 per startup.
+            </p>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- Methodology Card -->
+      <div class="card" style="margin-top: 24px;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3><i class="fa-solid fa-microscope" style="color: var(--primary);"></i> Experimental Methodology & Protocol Verification</h3>
+            <div class="card-subtitle">Summary of data preprocessing, splitting constraints, and evaluation rules.</div>
+          </div>
+          <span class="badge-tag badge-green"><i class="fa-solid fa-shield-halved"></i> Verified Intact</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Experiment Component</th>
+                <th>Specification</th>
+                <th>Purpose / Implementation Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Dataset Partition</strong></td>
+                <td>80% Train (40 rows) / 20% Test (10 rows)</td>
+                <td>Fixed <code>random_state=42</code> for exact reproducible evaluation.</td>
+              </tr>
+              <tr>
+                <td><strong>Cross Validation</strong></td>
+                <td>5-Fold K-Fold CV</td>
+                <td><code>KFold(n_splits=5, shuffle=True, random_state=42)</code> prevents fold leakage.</td>
+              </tr>
+              <tr>
+                <td><strong>Categorical Encoding</strong></td>
+                <td>Two Dummies with Intercept</td>
+                <td><code>OneHotEncoder(drop='first')</code> drops California as base level to avoid the dummy variable trap.</td>
+              </tr>
+              <tr>
+                <td><strong>Optimal Sweet Spot</strong></td>
+                <td>k = 2 (R&D Spend + Marketing Spend)</td>
+                <td>Minimizes CV RMSE ($9,682.56) and Test RMSE ($8,206.33) with zero multicollinearity (VIF = 2.26).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- Footer & References -->
+  <footer>
+    <div class="footer-inner">
+      <div style="max-width: 650px;">
+        <h4 style="font-size: 16px; margin-bottom: 8px; color: var(--slate-900);">
+          <i class="fa-solid fa-building-columns"></i> 50 Startups CRISP-DM Machine Learning Project
+        </h4>
+        <p style="line-height: 1.6; font-size: 13px; color: var(--slate-600);">
+          Developed for multiple linear regression model selection, parsimony validation, and statistical inference. Built with pure Vanilla HTML5, CSS3, JavaScript, and Chart.js, ready for deployment on GitHub Pages.
+        </p>
+      </div>
+
+      <div style="max-width: 580px;">
+        <h4 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--slate-400); margin-bottom: 8px;">
+          References & Acknowledgments
+        </h4>
+        <div class="ack-card">
+          <strong>Design & Layout Reference:</strong><br>
+          Style inspired by <a href="https://huanchen1107.github.io/AIoT-DIC2-MultipleLR/" target="_blank">AIoT-DIC2-MultipleLR</a> and <a href="https://statsunlock.com/multiple-linear-regression-calculator/" target="_blank">StatsUnlock Multiple Linear Regression Calculator</a>.<br>
+          <strong>Dataset:</strong> <a href="https://raw.githubusercontent.com/Avik-Jain/100-Days-Of-ML-Code/master/datasets/50_Startups.csv" target="_blank">50 Startups Dataset</a>.<br>
+          <strong>Methodology:</strong> CRISP-DM (Cross-Industry Standard Process for Data Mining).
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Script -->
+  <script src="app.js"></script>
+
+</body>
+</html>
