@@ -3,7 +3,7 @@
 > **Live Demo:** [https://yuwen0621.github.io/1014_DIC/](https://yuwen0621.github.io/1014_DIC/)
 
 An interactive, browser-based machine learning explorer for **Multiple Linear Regression** and **Feature Selection**, following the **CRISP-DM** methodology. Compare 6 feature selection algorithms across 3 datasets, visualize bias-variance tradeoffs, and run regression on your own CSV data — all without installing anything.
-<img width="1892" height="1001" alt="image" src="https://github.com/user-attachments/assets/f70c1e3f-6e0f-4a42-b72e-f25d437d38fe" />
+
 <img width="1173" height="12099" alt="yuwen0621 github io_1014_DIC_" src="https://github.com/user-attachments/assets/3e315a4c-0a3e-452d-97d0-2fbba51439ae" />
 
 
@@ -44,6 +44,7 @@ This project demonstrates how to apply multiple linear regression with systemati
 ## Dataset Selection
 
 ### 50 Startups — Predict Profit
+<img width="1892" height="1001" alt="image" src="https://github.com/user-attachments/assets/f70c1e3f-6e0f-4a42-b72e-f25d437d38fe" />
 
 - **Rows:** 50 startups across 3 US states
 - **Target:** `Profit` (continuous, USD)
@@ -52,7 +53,7 @@ This project demonstrates how to apply multiple linear regression with systemati
 - **Key Finding:** R&D Spend alone (r = 0.97) dominates; Administration is nearly uncorrelated (r = 0.20)
 
 ### Boston Housing — Predict Median Home Value (MEDV)
-
+<img width="1907" height="976" alt="image" src="https://github.com/user-attachments/assets/b86eb078-06a3-4f02-b50b-fa899d5e197d" />
 - **Rows:** 506 Boston census tracts
 - **Target:** `MEDV` — Median value of owner-occupied homes ($1,000s)
 - **Features (13):** CRIM, ZN, INDUS, CHAS, NOX, RM, AGE, DIS, RAD, TAX, PTRATIO, B, LSTAT
@@ -71,7 +72,7 @@ This project demonstrates how to apply multiple linear regression with systemati
 ---
 
 ## Custom Dataset Example URLs
-
+<img width="1899" height="991" alt="image" src="https://github.com/user-attachments/assets/fd0a6712-977e-49ad-babc-7f370e1bcbb0" />
 Copy and paste these URLs directly into the **Custom Dataset** input box:
 
 | Dataset | URL | Suggested Target |
