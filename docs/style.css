@@ -863,3 +863,86 @@ footer {
 .ack-card a:hover {
   text-decoration: underline;
 }
+
+/* ==========================================================================
+   Dataset Switcher Dropdown & Info Bar
+   ========================================================================== */
+.dataset-switcher-bar {
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.dataset-switcher-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dataset-switcher-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--slate-800);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dataset-select-container {
+  position: relative;
+  display: inline-block;
+}
+
+.dataset-select-input {
+  appearance: none;
+  background-color: white;
+  border: 2px solid var(--primary-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 36px 8px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.dataset-select-input:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.dataset-select-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.dataset-select-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--primary);
+  font-size: 11px;
+}
+
+.dataset-switcher-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
