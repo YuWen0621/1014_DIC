@@ -65,6 +65,7 @@
           <select id="datasetSelect" class="dataset-select-input">
             <option value="50_startups" selected>🏢 50 Startups (Profit Prediction • 50 rows)</option>
             <option value="boston_housing">🏡 Boston Housing (Median Value • 506 rows)</option>
+            <option value="custom_dataset">📁 Custom Dataset (Public CSV URL / Upload)</option>
           </select>
           <i class="fa-solid fa-chevron-down dataset-select-icon"></i>
         </div>
@@ -73,6 +74,69 @@
         <span class="badge-tag badge-blue"><i class="fa-solid fa-layer-group"></i> 5 Features (k=1..5)</span>
         <span class="badge-tag badge-purple"><i class="fa-solid fa-rotate"></i> 5-Fold CV</span>
         <span class="badge-tag badge-green"><i class="fa-solid fa-award"></i> Optimal Sweet Spot: k=2</span>
+      </div>
+    </div>
+
+    <!-- Custom Dataset Import & Configuration Panel -->
+    <div id="customDatasetPanel" class="custom-dataset-panel" style="display: none;">
+      <div class="custom-panel-header">
+        <div class="custom-panel-title">
+          <i class="fa-solid fa-file-csv" style="color: var(--primary);"></i>
+          <span>Import Custom Dataset for Regression Analysis</span>
+        </div>
+        <span class="badge-tag badge-green"><i class="fa-solid fa-bolt"></i> Pure Client-side JS</span>
+      </div>
+
+      <div class="custom-panel-body">
+        <div class="custom-input-row">
+          <div class="custom-input-col" style="flex: 1;">
+            <label class="custom-label" for="customCsvUrl">Public CSV URL:</label>
+            <input type="text" id="customCsvUrl" class="input-field" 
+              placeholder="https://example.com/data.csv" 
+              value="https://raw.githubusercontent.com/Avik-Jain/100-Days-Of-ML-Code/master/datasets/50_Startups.csv">
+          </div>
+          <div class="custom-btn-col">
+            <button id="btnFetchCsv" class="custom-btn custom-btn-primary">
+              <i class="fa-solid fa-cloud-arrow-down"></i> Fetch & Preview
+            </button>
+            <label class="custom-btn custom-btn-secondary" style="cursor: pointer; margin: 0;">
+              <i class="fa-solid fa-folder-open"></i> Upload File
+              <input type="file" id="customCsvFile" accept=".csv" style="display: none;">
+            </label>
+          </div>
+        </div>
+
+        <!-- Status Message Box -->
+        <div id="customStatusMsg" class="custom-status-msg" style="display: none;"></div>
+
+        <!-- Dataset Schema & Target Selector (Shown after fetch) -->
+        <div id="customConfigSection" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1.5px dashed var(--slate-200);">
+          <div class="custom-preview-summary">
+            <span id="customDataMeta" class="badge-tag badge-blue"></span>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <label for="customTargetSelect" style="font-size: 13px; font-weight: 700; color: var(--slate-800);">
+                Select Prediction Target (Y):
+              </label>
+              <select id="customTargetSelect" class="input-field" style="width: auto; padding: 7px 14px; font-weight: 600;">
+                <!-- Populated dynamically -->
+              </select>
+              <button id="btnRunCustomRegression" class="custom-btn custom-btn-success">
+                <i class="fa-solid fa-play"></i> Run Regression Analysis
+              </button>
+            </div>
+          </div>
+
+          <!-- Preview Table Container -->
+          <div style="margin-top: 14px;">
+            <span style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--slate-500);">Data Preview (First 5 Rows):</span>
+            <div class="table-responsive" style="margin-top: 6px; max-height: 180px;">
+              <table class="data-table" id="customPreviewTable">
+                <thead><tr id="customPreviewHeader"></tr></thead>
+                <tbody id="customPreviewBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -141,7 +205,7 @@
         </div>
       </div>
 
-      <span class="control-label" style="margin-top: 10px;"><i class="fa-solid fa-list-ol"></i> 2. Number of Features (k = 1 to 5)</span>
+      <span id="kControlLabel" class="control-label" style="margin-top: 10px;"><i class="fa-solid fa-list-ol"></i> 2. Number of Features (k = 1 to 5)</span>
       <div class="k-selector-group" id="kSelectorGroup">
         <button class="k-btn" data-k="1">k = 1 <span style="font-weight: 400; font-size: 11px;">(R&D Spend)</span></button>
         <button class="k-btn sweet-spot active" data-k="2">k = 2 ★ Optimal Sweet Spot <span style="font-size: 11px; font-weight: 700;">(Min RMSE)</span></button>
@@ -171,7 +235,7 @@
         </div>
         <div class="metric-val" id="valR2">0.9168</div>
         <div class="metric-note">
-          <span>Explains 91.68% of profit variance</span>
+          <span id="r2MetricNote">Explains 91.68% of profit variance</span>
         </div>
       </div>
 
@@ -243,7 +307,7 @@
         <div class="card-header">
           <div class="card-title-group">
             <h3><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> RMSE by Number of Features</h3>
-            <div class="card-subtitle">Lower is better. Sharp valley at k=2 (R&D Spend + Marketing Spend), rising error at k=5.</div>
+            <div class="card-subtitle" id="rmseChartSubtitle">Lower is better. Sharp valley at k=2 (R&D Spend + Marketing Spend), rising error at k=5.</div>
           </div>
           <span class="badge-tag badge-blue" id="rmseChartBadge">Pearson Correlation</span>
         </div>
@@ -257,7 +321,7 @@
         <div class="card-header">
           <div class="card-title-group">
             <h3><i class="fa-solid fa-arrow-trend-up" style="color: var(--accent-emerald);"></i> R-squared by Number of Features</h3>
-            <div class="card-subtitle">Higher is better. Peaks at k=2 (0.9168), dropping at k=5 (0.8987) due to noise.</div>
+            <div class="card-subtitle" id="r2ChartSubtitle">Higher is better. Peaks at k=2 (0.9168), dropping at k=5 (0.8987) due to noise.</div>
           </div>
           <span class="badge-tag badge-green" id="r2ChartBadge">Peak at k=2</span>
         </div>
@@ -408,7 +472,7 @@
     </div>
 
     <!-- Additional Analysis Section -->
-    <section class="additional-section">
+    <section id="additionalSection" class="additional-section">
       <div class="section-header">
         <h2><i class="fa-solid fa-folder-open" style="color: var(--primary);"></i> Additional Analysis & Publication Figures</h2>
         <p>Supplementary diagnostic visualizations, correlation matrices, consensus matrices, and cross-validation summaries from the local experiment.</p>
