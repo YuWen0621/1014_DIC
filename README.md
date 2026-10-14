@@ -3,6 +3,7 @@
 > **Live Demo:** [https://yuwen0621.github.io/1014_DIC/](https://yuwen0621.github.io/1014_DIC/)
 
 An interactive, browser-based machine learning explorer for **Multiple Linear Regression** and **Feature Selection**, following the **CRISP-DM** methodology. Compare 6 feature selection algorithms across 3 datasets, visualize bias-variance tradeoffs, and run regression on your own CSV data — all without installing anything.
+<img width="1892" height="1001" alt="image" src="https://github.com/user-attachments/assets/f70c1e3f-6e0f-4a42-b72e-f25d437d38fe" />
 
 ---
 
